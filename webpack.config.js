@@ -5,6 +5,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require("copy-webpack-plugin");
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const TerserPlugin = require("terser-webpack-plugin");
+const ESLintPlugin = require('eslint-webpack-plugin');
 
 const isDev = process.env.NODE_ENV === 'development';
 const isProd = !isDev;
@@ -29,7 +30,10 @@ const filename = (ext) => isDev ? `[name].${ext}` : `[name].[contenthash].${ext}
 module.exports = {
   context: path.resolve(__dirname, 'src'),
   mode: 'development',
-  entry: './js/bundle.js',
+  entry: ['@babel/polyfill', './js/index.ts'],
+  resolve: {
+    extensions: ['.ts', '.js'],
+  },
   output: {
     filename: `./js/${filename('js')}`,
     path: path.resolve(__dirname, 'dist'),
@@ -53,10 +57,11 @@ module.exports = {
         collapseWhitespace: isProd
       }
     }),
-    new CleanWebpackPlugin(),
+    new CleanWebpackPlugin({cleanStaleWebpackAssets: false}),
     new MiniCssExtractPlugin({
       filename: `./css/${filename('css')}`
     }),
+    new ESLintPlugin({ extensions: ['.ts', '.js'] }),
     new CopyPlugin({
       patterns: [
         { from: path.resolve(__dirname, 'src/assets'), to: path.resolve(__dirname, 'dist') },
@@ -99,13 +104,18 @@ module.exports = {
         ],
       },
       {
+        test: /\.ts?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
+      {
         test: /\.js$/,
         exclude: /node_modules/,
         use: ['babel-loader'],
       },
       {
-        test: /\.(?:|png|jpe?g|gif|svg)$/i,
-        type: 'asset/resource'
+        test: /\.(?:ico|png|jpe?g|gif|svg)$/i,
+        type: 'asset/resource',
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
