@@ -3,9 +3,26 @@ const HTMLWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require("copy-webpack-plugin");
+const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const TerserPlugin = require("terser-webpack-plugin");
 
 const isDev = process.env.NODE_ENV === 'development';
 const isProd = !isDev;
+
+const optimization = function () {
+  const configObj = {
+    splitChunks: {
+      chunks: 'all'
+    }
+  };
+  if (isProd) {
+    configObj.minimizer = [
+      new OptimizeCssAssetsPlugin(),
+      new TerserPlugin()
+    ]
+  };
+  return configObj;
+};
 
 const filename = (ext) => isDev ? `[name].${ext}` : `[name].[contenthash].${ext}`;
 
@@ -16,7 +33,8 @@ module.exports = {
   output: {
     filename: `./js/${filename('js')}`,
     path: path.resolve(__dirname, 'dist'),
-    // publicPath: '',
+    assetModuleFilename: `./img/${filename('[ext]')}`,
+    publicPath: '',
   },
   devServer: {
     historyApiFallback: true,
@@ -26,6 +44,7 @@ module.exports = {
     hot: true,  
     port: 9000,
   },
+  optimization: optimization(),
   plugins: [
     new HTMLWebpackPlugin({
       template: path.resolve(__dirname, 'src/index.html'),
@@ -40,10 +59,11 @@ module.exports = {
     }),
     new CopyPlugin({
       patterns: [
-        { from: path.resolve(__dirname, 'src/assets'), to: path.resolve(__dirname, 'dist/assets') },
+        { from: path.resolve(__dirname, 'src/assets'), to: path.resolve(__dirname, 'dist') },
       ],
     }),
   ],
+  devtool: isProd ? false : 'source-map',
   module: {
     rules: [
       {
@@ -59,23 +79,37 @@ module.exports = {
               hmr: isDev
             },
           },
+          'style-loader',
           'css-loader'
         ],
       },
       {
         test: /\.s[ac]ss$/i,
-        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              publicPath: (resourcePath, context) => {
+                return path.relative(path.dirname(resourcePath), context) + '/';
+              },
+            },
+          },
+          'css-loader',
+          'sass-loader',
+        ],
+      },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: ['babel-loader'],
       },
       {
         test: /\.(?:|png|jpe?g|gif|svg)$/i,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              name: `./img/${filename('[ext]')}`
-            },
-          },
-        ],
+        type: 'asset/resource'
+      },
+      {
+        test: /\.(woff|woff2|eot|ttf|otf)$/i,
+        type: 'asset/resource',
       },
     ],
   },
