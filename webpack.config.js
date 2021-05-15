@@ -30,10 +30,7 @@ const filename = (ext) => isDev ? `[name].${ext}` : `[name].[contenthash].${ext}
 module.exports = {
   context: path.resolve(__dirname, 'src'),
   mode: 'development',
-  entry: ['@babel/polyfill', './js/index.ts'],
-  resolve: {
-    extensions: ['.ts', '.js'],
-  },
+  entry: ['@babel/polyfill', './ts/index.ts'],
   output: {
     filename: `./js/${filename('js')}`,
     path: path.resolve(__dirname, 'dist'),
@@ -69,6 +66,9 @@ module.exports = {
     }),
   ],
   devtool: isProd ? false : 'source-map',
+  resolve: {
+    extensions: ['.ts', '.js'],
+  },
   module: {
     rules: [
       {
@@ -105,8 +105,8 @@ module.exports = {
       },
       {
         test: /\.ts?$/,
-        use: 'ts-loader',
         exclude: /node_modules/,
+        use: 'ts-loader',
       },
       {
         test: /\.js$/,
