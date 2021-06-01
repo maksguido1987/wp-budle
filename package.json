@@ -7,7 +7,11 @@
     "build": "cross-env NODE_ENV=production webpack --mode production",
     "dev": "cross-env NODE_ENV=development webpack --mode development",
     "start": "cross-env NODE_ENV=development webpack serve --mode development",
-    "lint": "eslint src"
+    "lint": "eslint --ext .ts src --fix"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 120
   },
   "author": "Maksim Guido",
   "license": "ISC",
@@ -26,7 +30,9 @@
     "css-loader": "^5.2.4",
     "eslint": "^7.25.0",
     "eslint-config-airbnb-typescript": "^12.3.1",
+    "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-prettier": "^3.4.0",
     "eslint-webpack-plugin": "^2.5.4",
     "file-loader": "^6.2.0",
     "html-loader": "^2.1.2",
@@ -34,6 +40,7 @@
     "mini-css-extract-plugin": "^1.6.0",
     "node-sass": "^5.0.0",
     "optimize-css-assets-webpack-plugin": "^5.0.4",
+    "prettier": "^2.3.0",
     "sass-loader": "^11.0.1",
     "style-loader": "^2.0.0",
     "terser-webpack-plugin": "^5.1.1",
