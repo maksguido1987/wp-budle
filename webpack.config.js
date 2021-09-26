@@ -2,30 +2,27 @@ const path = require('path');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const CopyPlugin = require("copy-webpack-plugin");
+const CopyPlugin = require('copy-webpack-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const TerserPlugin = require("terser-webpack-plugin");
+const TerserPlugin = require('terser-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 
 const isDev = process.env.NODE_ENV === 'development';
 const isProd = !isDev;
 
-const optimization = function () {
+const optimization = () => {
   const configObj = {
     splitChunks: {
-      chunks: 'all'
-    }
+      chunks: 'all',
+    },
   };
   if (isProd) {
-    configObj.minimizer = [
-      new OptimizeCssAssetsPlugin(),
-      new TerserPlugin()
-    ]
-  };
+    configObj.minimizer = [new OptimizeCssAssetsPlugin(), new TerserPlugin()];
+  }
   return configObj;
 };
 
-const filename = (ext) => isDev ? `[name].${ext}` : `[name].[contenthash].${ext}`;
+const filename = (ext) => (isDev ? `[name].${ext}` : `[name].[contenthash].${ext}`);
 
 module.exports = {
   context: path.resolve(__dirname, 'src'),
@@ -42,7 +39,7 @@ module.exports = {
     contentBase: path.join(__dirname, 'dist'),
     open: true,
     compress: true,
-    hot: true,  
+    hot: true,
     port: 9000,
   },
   optimization: optimization(),
@@ -51,18 +48,16 @@ module.exports = {
       template: path.resolve(__dirname, 'src/index.html'),
       filename: 'index.html',
       minify: {
-        collapseWhitespace: isProd
-      }
+        collapseWhitespace: isProd,
+      },
     }),
-    new CleanWebpackPlugin({cleanStaleWebpackAssets: false}),
+    new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
     new MiniCssExtractPlugin({
-      filename: `./css/${filename('css')}`
+      filename: `./css/${filename('css')}`,
     }),
     new ESLintPlugin({ extensions: ['.ts', '.js'] }),
     new CopyPlugin({
-      patterns: [
-        { from: path.resolve(__dirname, 'src/assets'), to: path.resolve(__dirname, 'dist') },
-      ],
+      patterns: [{ from: path.resolve(__dirname, 'src/assets'), to: path.resolve(__dirname, 'dist') }],
     }),
   ],
   devtool: isProd ? false : 'source-map',
@@ -81,11 +76,11 @@ module.exports = {
           {
             loader: MiniCssExtractPlugin.loader,
             options: {
-              hmr: isDev
+              hmr: isDev,
             },
           },
           'style-loader',
-          'css-loader'
+          'css-loader',
         ],
       },
       {
@@ -95,7 +90,7 @@ module.exports = {
             loader: MiniCssExtractPlugin.loader,
             options: {
               publicPath: (resourcePath, context) => {
-                return path.relative(path.dirname(resourcePath), context) + '/';
+                return `${path.relative(path.dirname(resourcePath), context)}/`;
               },
             },
           },
